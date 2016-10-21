@@ -1,0 +1,17 @@
+.idea
+.idea/
+out
+*.iml
+.DS_Store
+/inputFiles/*
+outputFiles
+build/
+.gradle
+*/gradle.3.0.taskArtifacts
+*.jar
+/temp/
+/samples/
+alice.txt
+data.csv
+/src/kmeans/data.tsv
+1912-small.csv

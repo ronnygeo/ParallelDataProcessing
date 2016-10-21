@@ -1,0 +1,5 @@
+NoLockExec.jar: NoLockExec.java build.gradle Makefile
+    cd NoLock
+	gradle build
+	gradle shadowJar
+	cp build/libs/NoLock-all.jar NoLock.jar

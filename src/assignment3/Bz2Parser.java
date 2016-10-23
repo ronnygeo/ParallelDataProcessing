@@ -21,7 +21,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
-/** Decompresses bz2 file and parses Wikipages on each line. */
+/** Decompresses bz2 file and parses Wikipages on each line.  */
 public class Bz2Parser {
     private static Pattern namePattern;
     private static Pattern linkPattern;
@@ -34,8 +34,8 @@ public class Bz2Parser {
     }
 
     public static HashMap<String, List> getAdjList(String line) throws Exception {
-
         BufferedReader reader = null;
+        //Map to store the links on the current page
         adj = new HashMap<>();
             // Configure parser.
             SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -64,15 +64,7 @@ public class Bz2Parser {
                     // Discard ill-formatted pages.
                     return null;
                 }
-
-                List<String> temp = adj.get(pageName);
-                if (temp != null) {
-                    for (String link: linkPageNames) {
-                        if (!temp.contains(link)) {
-                            temp.add(link);
-                        }
-                    }
-                }
+                //Adding the node and link to the map
                 adj.put(pageName, linkPageNames);
             return adj;
     }

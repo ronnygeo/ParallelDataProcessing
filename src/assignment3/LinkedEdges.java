@@ -10,6 +10,8 @@ import java.util.ArrayList;
 /**
  * Created by ronnygeo on 10/18/16.
  */
+//LinkedEdges extend ArrayWritable to store the links of a node.
+    // Not currently used.
 public class LinkedEdges extends ArrayWritable {
 //        public LinkedEdges(Class<? extends Writable> elementClass) {
 //            super(elementClass);

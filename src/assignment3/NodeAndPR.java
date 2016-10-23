@@ -13,6 +13,9 @@ import java.io.IOException;
 /**
  * Created by ronnygeo on 10/22/16.
  */
+//NodeAndPR class is used to store the Node and the probability for a particular node.
+    //This class is used in the iterate mapper in cases when there can
+    //be either a Node or a probability.
 public class NodeAndPR implements Writable {
     Node node = new Node();
     DoubleWritable pr = new DoubleWritable(0);
@@ -44,7 +47,6 @@ public class NodeAndPR implements Writable {
         if (node.getName().equals(" ")) {
             return false;
         } else {
-//            System.out.println(node);
             return true;
         }
     }
@@ -74,14 +76,12 @@ public class NodeAndPR implements Writable {
     public void write(DataOutput out) throws IOException {
         if (node == null) {
             out.writeBoolean(false);
-//            NullWritable.get().write(out);
         } else {
             out.writeBoolean(true);
             node.write(out);
         }
 
         if (pr == null) {
-//            NullWritable.get().write(out);
             out.writeBoolean(false);
         } else {
             out.writeBoolean(true);

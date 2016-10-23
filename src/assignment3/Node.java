@@ -10,7 +10,8 @@ import java.util.ArrayList;
 /**
  * Created by ronnygeo on 10/18/16.
  */
-
+//Node class is used to store all the information related to a Node
+    //It has the name of the node, its page rank and its adjacent linked nodes
 public class Node implements Writable, WritableComparable<Node> {
     String name = " ";
     double pageRank = 0;
@@ -48,18 +49,15 @@ public class Node implements Writable, WritableComparable<Node> {
     public void readFields(DataInput in) throws IOException {
         name = in.readUTF();
         pageRank = in.readDouble();
+        //Write the length of the links list
         int len = in.readInt();
         links = new ArrayList<>();
+        //Read all the links if there are links
         while (len > 0) {
             String link = in.readUTF();
             links.add(link);
             len--;
         }
-//        if (in.readBoolean()) {
-//            links.readFields(in);
-//        } else {
-//            links = null;
-//        }
     }
 
     @Override
@@ -67,17 +65,10 @@ public class Node implements Writable, WritableComparable<Node> {
         out.writeUTF(name);
         out.writeDouble(pageRank);
         out.writeInt(links.size());
+        //Write all the links
         for (int i=0; i < links.size(); i++) {
             out.writeUTF(links.get(i));
         }
-//        name.write(out);
-//        pageRank.write(out);
-//        if (links != null && links.size() > 0) {
-//            out.writeBoolean(true);
-//            links.write(out);
-//        } else {
-//            out.writeBoolean(false);
-//        }
     }
 
     @Override

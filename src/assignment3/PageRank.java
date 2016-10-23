@@ -11,19 +11,25 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
+import org.apache.hadoop.yarn.util.SystemClock;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 
 /**
  * Created by ronnygeo on 10/17/16.
  */
+//PageRank class is the main class that runs the page rank job.
 public class PageRank {
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
+        long start_time, end_time;
         conf.setLong("N", 0);
         conf.setDouble("alpha", 0.15);
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
-
         Path input, output;
         if (otherArgs.length > 0) {
             input = new Path(otherArgs[0]);
@@ -33,22 +39,39 @@ public class PageRank {
             input = new Path("wikipedia-simple-html.bz2");
             output = new Path("out");
         }
-
+        start_time = System.currentTimeMillis();
+        //Read the data from the input and create the adj list data file
         readAndIterate(conf, input);
-        getNCount(conf, new Path("adjacency_list"));
-//        System.out.println("N value: " + conf.getLong("N", 0));
+        end_time = System.currentTimeMillis();
+        System.out.println("Preprocessing Running Time: " + (end_time - start_time) + "s");
 
+        start_time = System.currentTimeMillis();
+        //calculate the count of N from the list
+        getNCount(conf, new Path("adjacency_list"));
+        end_time = System.currentTimeMillis();
+        System.out.println("NCount Job Running Time: " + (end_time - start_time) + "s");
+
+        //Start iterable algorithm
         int ii = 0;
+        start_time = System.currentTimeMillis();
         while (ii < 10) {
             iterate(conf, ii++);
         }
+        end_time = System.currentTimeMillis();
+        System.out.println("Iteration Jobs Running Time: " + (end_time - start_time) + "s");
+
+        start_time = System.currentTimeMillis();
+        //Write the output to final output file
         writeOutput(conf, new Path(ii-1+"-iter-output"), output);
+        end_time = System.currentTimeMillis();
+        System.out.println("Top K Job Running Time: " + (end_time - start_time) + "s");
     }
 
     public static void readAndIterate(Configuration conf, Path input) throws Exception {
         conf.setInt("itr", -1);
         conf.setLong("dangling", 0);
         Job job = Job.getInstance(conf, "Graph creator job");
+        job.setJarByClass(PageRank.class);
         job.setMapperClass(InputMapper.class);
         job.setReducerClass(ListReducer.class);
         job.setMapOutputKeyClass(Text.class);
@@ -57,7 +80,6 @@ public class PageRank {
         job.setOutputValueClass(LinkedEdges.class);
         FileInputFormat.addInputPath(job, input);
         FileOutputFormat.setOutputPath(job, new Path("adjacency_list"));
-        job.setNumReduceTasks(2);
 
         boolean ok = job.waitForCompletion(true);
         if (!ok) {
@@ -68,6 +90,7 @@ public class PageRank {
     //A job to count all the N in the graph
     public static void getNCount(Configuration conf, Path input) throws Exception {
         Job job = Job.getInstance(conf, "N Counter job");
+        job.setJarByClass(PageRank.class);
         job.setMapperClass(NCountMapper.class);
         job.setReducerClass(NCountReducer.class);
         job.setMapOutputKeyClass(Text.class);
@@ -113,13 +136,13 @@ public class PageRank {
     public static void iterate(Configuration conf, int ii) throws Exception {
         conf.setInt("itr", ii);
         Job job = Job.getInstance(conf, "Page rank iteration");
+        job.setJarByClass(PageRank.class);
         job.setMapperClass(IterateMapper.class);
         job.setMapOutputKeyClass(Text.class);
         job.setMapOutputValueClass(NodeAndPR.class);
         job.setReducerClass(IterateReducer.class);
         job.setOutputKeyClass(Node.class);
         job.setOutputValueClass(NullWritable.class);
-        job.setNumReduceTasks(4);
 
         if (ii == 0)
             FileInputFormat.addInputPath(job, new Path("adjacency_list"));

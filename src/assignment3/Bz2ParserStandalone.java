@@ -22,7 +22,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 
-/** Decompresses bz2 file and parses Wikipages on each line. */
+/** Decompresses bz2 file and parses Wikipages on each line. This is the standalone Java application. */
 public class Bz2ParserStandalone {
     private static Pattern namePattern;
     private static Pattern linkPattern;

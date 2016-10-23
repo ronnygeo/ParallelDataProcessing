@@ -7,7 +7,7 @@ import org.apache.hadoop.mapreduce.Mapper;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class IterateMapper extends Mapper<Object, Text, Text, Node> {
+public class IterateMapper extends Mapper<Object, Text, Text, NodeAndPR> {
 //	public ArrayList<DataPoint> centers;
 	private int N;
 	private int itr;
@@ -32,12 +32,12 @@ public class IterateMapper extends Mapper<Object, Text, Text, Node> {
 				list.add(link);
 			}
 		}
-		LinkedEdges links = new LinkedEdges(list.toArray(new String[0]));
-		node.setLinks(links);
-//		ctx.write(new Text(node.getName()), new NodeAndPR(node));
+//		LinkedEdges links = new LinkedEdges(list.toArray(new String[0]));
+		node.setLinks(list);
+		ctx.write(new Text(node.getName()), new NodeAndPR(node));
 		double p = node.getPageRank() / list.size();
 		for (String link: list) {
-			ctx.write(new Text(link), node);
+			ctx.write(new Text(link), new NodeAndPR(p));
 		}
 	}
 }

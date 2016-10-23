@@ -26,10 +26,11 @@ public class ListReducer extends Reducer<Text, Text, Node, NullWritable> {
         node.setPageRank(0);
         ctx.getCounter(ReduceCounters.N).increment(1);
         for (Text val : values) {
+            if (!key.toString().equals(val.toString()))
             list.add(val.toString());
         }
-        LinkedEdges links = new LinkedEdges(list.toArray(new String[0]));
-        node.setLinks(links);
+//        LinkedEdges links = new LinkedEdges(list.toArray(new String[0]));
+        node.setLinks(list);
         ctx.write(node, NullWritable.get());
     }
 

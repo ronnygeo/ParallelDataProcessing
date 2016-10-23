@@ -6,9 +6,10 @@ import org.apache.hadoop.io.ObjectWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
-public class IterateReducer extends Reducer<Text, Node, Node, NullWritable> {
+public class IterateReducer extends Reducer<Text, NodeAndPR, Node, NullWritable> {
 	private int itr;
 	private double alpha;
 	private double dangling;
@@ -28,25 +29,25 @@ public class IterateReducer extends Reducer<Text, Node, Node, NullWritable> {
 
 	public static enum IterCounter {DANGLING_COUNTER, CONVERGENCE}
 	
-	public void reduce(Text key, Iterable<Node> vals, Context ctx) throws IOException, InterruptedException {
+	public void reduce(Text key, Iterable<NodeAndPR> vals, Context ctx) throws IOException, InterruptedException {
 		double sum = 0;
 		Node n = null;
 		double pr;
-		for (Node val: vals) {
-			System.out.println(val);
+		for (NodeAndPR val: vals) {
+//			System.out.println(val);
 			//If val is a node save it to n else add the probability to the sum
-			if (n == null) {
-//				n = val.getNode();
+			if (val.isNode()) {
+				n = val.getNode();
+			} else {
+				sum += val.getPr();
 			}
-//				sum += val.getPr();
 		}
 		//If there is no node in the adjacency matrix, create a new one with an empty list
 		if (n == null) {
 			n = new Node(key.toString());
-			String[] temp = {};
-			n.setLinks(new LinkedEdges(temp));
+			ArrayList<String> temp = new ArrayList<>();
+			n.setLinks(temp);
 		}
-
 		//Calculating the new page rank value
 		pr = alpha / N + (1 - alpha) * ((dangling/N) + sum);
 

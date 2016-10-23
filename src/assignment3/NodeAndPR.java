@@ -14,7 +14,7 @@ import java.io.IOException;
  * Created by ronnygeo on 10/22/16.
  */
 public class NodeAndPR implements Writable {
-    Node node;
+    Node node = new Node();
     DoubleWritable pr = new DoubleWritable(0);
 
     public NodeAndPR(Node n) {
@@ -41,7 +41,7 @@ public class NodeAndPR implements Writable {
     }
 
     public boolean isNode() {
-        return node != null;
+        return !node.getName().equals("");
     }
 
    public String toString() {
@@ -54,10 +54,14 @@ public class NodeAndPR implements Writable {
    public void readFields(DataInput in) throws IOException {
        if (in.readBoolean()) {
            node.readFields(in);
+       } else {
+           node = new Node();
        }
 
        if (in.readBoolean()) {
            pr.readFields(in);
+       } else {
+           new DoubleWritable(0);
        }
    }
 

@@ -37,7 +37,7 @@ public class PageRank {
 //        System.out.println("N value: " + conf.getLong("N", 0));
 
         int ii = 0;
-        while (ii < 2) {
+        while (ii < 5) {
             iterate(conf, ii++);
         }
         writeOutput(conf, new Path(ii-1+"-iter-output"), output);
@@ -94,7 +94,7 @@ public class PageRank {
 //        job.setJarByClass(PageRank.class);
         job.setMapperClass(IterateMapper.class);
         job.setMapOutputKeyClass(Text.class);
-        job.setMapOutputValueClass(Node.class);
+        job.setMapOutputValueClass(NodeAndPR.class);
 //        job.setPartitionerClass(IteratePartitioner.class);
         job.setReducerClass(IterateReducer.class);
         job.setOutputKeyClass(Node.class);
@@ -115,11 +115,11 @@ public class PageRank {
 
         //    Use a counter to count up how many
         long dangling = job.getCounters().findCounter(IterateReducer.IterCounter.DANGLING_COUNTER).getValue();
-        System.out.println(dangling);
+        System.out.println("Dangling: " + Double.longBitsToDouble(dangling));
         conf.setLong("dangling", dangling);
 
         long diff = job.getCounters().findCounter(IterateReducer.IterCounter.CONVERGENCE).getValue();
-        System.out.println(diff);
+        System.out.println("Diff: " + Double.longBitsToDouble(diff));
         conf.setDouble("diff", Double.longBitsToDouble(diff));
     }
 

@@ -43,13 +43,14 @@ public class PageRank {
         //Read the data from the input and create the adj list data file
         readAndIterate(conf, input);
         end_time = System.currentTimeMillis();
-        System.out.println("Preprocessing Running Time: " + (end_time - start_time) + "s");
+        System.out.println("Preprocessing Running Time: " + (end_time - start_time) + "ms");
 
         start_time = System.currentTimeMillis();
-        //calculate the count of N from the list
+        //calculate the count of N from the list.
+        //Need to calculate N this way to get accurate count and improve the total value
         getNCount(conf, new Path("adjacency_list"));
         end_time = System.currentTimeMillis();
-        System.out.println("NCount Job Running Time: " + (end_time - start_time) + "s");
+        System.out.println("NCount Job Running Time: " + (end_time - start_time) + "ms");
 
         //Start iterable algorithm
         int ii = 0;
@@ -58,13 +59,13 @@ public class PageRank {
             iterate(conf, ii++);
         }
         end_time = System.currentTimeMillis();
-        System.out.println("Iteration Jobs Running Time: " + (end_time - start_time) + "s");
+        System.out.println("Iteration Jobs Running Time: " + (end_time - start_time) + "ms");
 
         start_time = System.currentTimeMillis();
         //Write the output to final output file
         writeOutput(conf, new Path(ii-1+"-iter-output"), output);
         end_time = System.currentTimeMillis();
-        System.out.println("Top K Job Running Time: " + (end_time - start_time) + "s");
+        System.out.println("Top K Job Running Time: " + (end_time - start_time) + "ms");
     }
 
     public static void readAndIterate(Configuration conf, Path input) throws Exception {

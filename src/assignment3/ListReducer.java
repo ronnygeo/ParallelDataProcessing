@@ -13,12 +13,10 @@ import java.util.ArrayList;
  */
 public class ListReducer extends Reducer<Text, Text, Node, NullWritable> {
 
-    private long nodesCount;
-
     static enum ReduceCounters { N }
 
     public void setup(Context ctx) {
-        nodesCount = 0;
+
     }
 
 
@@ -27,7 +25,6 @@ public class ListReducer extends Reducer<Text, Text, Node, NullWritable> {
         Node node = new Node(key.toString());
         node.setPageRank(0);
         ctx.getCounter(ReduceCounters.N).increment(1);
-        nodesCount++;
         for (Text val : values) {
             list.add(val.toString());
         }
@@ -38,7 +35,6 @@ public class ListReducer extends Reducer<Text, Text, Node, NullWritable> {
 
     public void cleanup(Context ctx) {
         Configuration conf = ctx.getConfiguration();
-        conf.setLong("N", nodesCount + conf.getLong("N", 0));
         System.out.println(conf.getLong("N", 0));
 //        conf.setLong("N", 1000);
     }

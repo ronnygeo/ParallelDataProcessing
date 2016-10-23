@@ -24,12 +24,8 @@ public class InputMapper extends Mapper<Object, Text, Text, Text> {
 	public void setup(Context ctx) throws IOException, InterruptedException {
 		adj = new HashMap<>();
 
-//    	K = ctx.getConfiguration().getInt("K", -10);
-//    	if (K == -10) {
-//    		throw new Error("Didn't propagate K");
-//    	}
 	}
-	
+
 	public void cleanup(Context ctx) throws IOException, InterruptedException {
 		for (Map.Entry e : adj.entrySet()) {
 			ArrayList<String> edgeNodes = (ArrayList<String>) e.getValue();

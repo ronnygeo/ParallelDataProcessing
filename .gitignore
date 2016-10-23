@@ -15,3 +15,4 @@ alice.txt
 data.csv
 /src/kmeans/data.tsv
 1912-small.csv
+/adjacency_list/

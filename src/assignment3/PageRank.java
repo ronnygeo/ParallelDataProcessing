@@ -2,10 +2,11 @@ package assignment3;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
-import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
+import org.apache.hadoop.mapreduce.lib.aggregate.DoubleValueSum;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.SequenceFileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
@@ -18,14 +19,17 @@ public class PageRank {
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
         conf.setLong("N", 0);
+        conf.setDouble("alpha", 0.15);
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 
-        Path input;
+        Path input, output;
         if (otherArgs.length > 0) {
             input = new Path(otherArgs[0]);
+            output = new Path(otherArgs[1]);
         }
         else {
             input = new Path("data.tsv.bz2");
+            output = new Path("out");
         }
 
         readAndIterate(conf, input);
@@ -33,19 +37,17 @@ public class PageRank {
 //        System.out.println("N value: " + conf.getLong("N", 0));
 
         int ii = 0;
-        boolean done = false;
-        while (!done) {
-            done = iterate(conf, ii++);
+        while (ii < 2) {
+            iterate(conf, ii++);
         }
-
-//        writeOutput(conf, ii);
+        writeOutput(conf, new Path(ii-1+"-iter-output"), output);
     }
 
     public static void readAndIterate(Configuration conf, Path input) throws Exception {
         conf.setInt("itr", -1);
 
-        Job job = Job.getInstance(conf, "read input");
-        job.setJarByClass(PageRank.class);
+        Job job = Job.getInstance(conf, "Graph creator job");
+//        job.setJarByClass(PageRank.class);
         job.setMapperClass(InputMapper.class);
         job.setReducerClass(ListReducer.class);
         job.setMapOutputKeyClass(Text.class);
@@ -64,51 +66,61 @@ public class PageRank {
         conf.setLong("N", NCount);
     }
 
-    public static boolean iterate(Configuration conf, int ii) throws Exception {
-        Job job = Job.getInstance(conf, "k-Means iteration");
+    public static void writeOutput(Configuration conf, Path input, Path output) throws Exception {
+        conf.setInt("K", 100);
+        Job job = Job.getInstance(conf, "Write top 100 output");
+        job.setJarByClass(PageRank.class);
+        job.setMapperClass(OutputMapper.class);
+        job.setReducerClass(TopKReducer.class);
+        job.setMapOutputKeyClass(DoubleWritable.class);
+        job.setMapOutputValueClass(Text.class);
+        job.setOutputKeyClass(Text.class);
+        job.setOutputValueClass(DoubleWritable.class);
+        FileInputFormat.addInputPath(job, input);
+        FileOutputFormat.setOutputPath(job, output);
+        job.setNumReduceTasks(1);
+
+        boolean ok = job.waitForCompletion(true);
+        if (!ok) {
+            throw new Exception("Job failed");
+        }
+    }
+
+
+    public static void iterate(Configuration conf, int ii) throws Exception {
+        conf.setInt("itr", ii);
+        Job job = Job.getInstance(conf, "Page rank iteration");
 //        job.setNumReduceTasks(5);
+//        job.setJarByClass(PageRank.class);
         job.setMapperClass(IterateMapper.class);
+        job.setMapOutputKeyClass(Text.class);
+        job.setMapOutputValueClass(Node.class);
 //        job.setPartitionerClass(IteratePartitioner.class);
         job.setReducerClass(IterateReducer.class);
+        job.setOutputKeyClass(Node.class);
+        job.setOutputValueClass(NullWritable.class);
 
-        // FIXME: Set up job.
-        FileInputFormat.addInputPath(job, new Path(ii-1+"-iter-output"));
-        FileOutputFormat.setOutputPath(job, new Path(ii+"-iter-output"));
+        if (ii == 0)
+            FileInputFormat.addInputPath(job, new Path("adjacency_list"));
+        else
+            FileInputFormat.addInputPath(job, new Path(ii-1+"-iter-output"));
+            FileOutputFormat.setOutputPath(job, new Path(ii+"-iter-output"));
 
 
         boolean ok = job.waitForCompletion(true);
+
         if (!ok) {
             throw new Exception("Job failed");
         }
 
-        // FIXME:
         //    Use a counter to count up how many
-        //    points are assigned to a different cluster
-        //    in this iteration.
+        long dangling = job.getCounters().findCounter(IterateReducer.IterCounter.DANGLING_COUNTER).getValue();
+        System.out.println(dangling);
+        conf.setLong("dangling", dangling);
 
-        int numChanges = 5;
-        return numChanges < 10;
+        long diff = job.getCounters().findCounter(IterateReducer.IterCounter.CONVERGENCE).getValue();
+        System.out.println(diff);
+        conf.setDouble("diff", Double.longBitsToDouble(diff));
     }
 
-    public static void writeOutput(Configuration conf, int ii) throws Exception {
-        conf.setInt("itr", ii);
-
-        Job job = Job.getInstance(conf, "write output");
-        job.setJarByClass(PageRank.class);
-        job.setMapperClass(Mapper.class);
-        job.setReducerClass(Reducer.class);
-        job.setPartitionerClass(IteratePartitioner.class);
-//        job.setOutputKeyClass(DataPoint.class);
-//        job.setOutputValueClass(DataPoint.class);
-//        job.setNumReduceTasks(K + 1);
-
-        job.setInputFormatClass(SequenceFileInputFormat.class);
-        FileInputFormat.addInputPath(job, new Path("last-iter-output"));
-        FileOutputFormat.setOutputPath(job, new Path("output"));
-
-        boolean ok = job.waitForCompletion(true);
-        if (!ok) {
-            throw new Exception("Job failed");
-        }
-    }
 }

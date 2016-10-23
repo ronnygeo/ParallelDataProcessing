@@ -11,29 +11,43 @@ import java.util.ArrayList;
  * Created by ronnygeo on 10/18/16.
  */
 public class LinkedEdges extends ArrayWritable {
-        public LinkedEdges(Class<? extends Writable> itemClass) {
-            super(itemClass);
-        }
+//        public LinkedEdges(Class<? extends Writable> elementClass) {
+//            super(elementClass);
+//        }
 
-        public LinkedEdges(String[] strings) {
+    public LinkedEdges() {
+        super(Text.class);
+    }
+
+
+    public LinkedEdges(String[] strings) {
             super(Text.class);
-            Text[] texts = new Text[strings.length];
-            for (int i = 0; i < strings.length; i++) {
-                texts[i] = new Text(strings[i]);
+            if (strings.length > 0) {
+                Text[] texts = new Text[strings.length];
+                for (int i = 0; i < strings.length; i++) {
+                    texts[i] = new Text(strings[i]);
+                }
+                set(texts);
             }
-            set(texts);
         }
 
         @Override
         public String toString() {
             String value = "";
             Text[] values = (Text[]) get();
-            for (int i = 0; i < values.length; i++) {
-                value += values[i];
-                if (i != values.length - 1) {
-                    value += ",";
+            if (values.length > 0) {
+                for (int i = 0; i < values.length; i++) {
+                    value += values[i];
+                    if (i != values.length - 1) {
+                        value += ",";
+                    }
                 }
             }
             return value;
+        }
+
+        public int size() {
+            Text[] values = (Text[]) get();
+            return values.length;
         }
     }

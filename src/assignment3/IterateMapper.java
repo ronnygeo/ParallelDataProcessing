@@ -1,17 +1,17 @@
 package assignment3;
 
 
-import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.*;
 import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class IterateMapper extends Mapper<Object, Text, Text, LinkedEdges> {
+public class IterateMapper extends Mapper<Object, Text, Text, Node> {
 //	public ArrayList<DataPoint> centers;
-	int N;
-	int itr;
-	
+	private int N;
+	private int itr;
+
 	@Override
 	public void setup(Context ctx) throws IOException {
 		N   = ctx.getConfiguration().getInt("N", -10);
@@ -27,10 +27,17 @@ public class IterateMapper extends Mapper<Object, Text, Text, LinkedEdges> {
 		node.setPageRank(1/N);
 		else
 			node.setPageRank(Double.parseDouble(line[1]));
- 		for (String link: line[3].split(",")) {
-			list.add(link);
+		if (line.length > 2) {
+			for (String link : line[2].split(",")) {
+				list.add(link);
+			}
 		}
 		LinkedEdges links = new LinkedEdges(list.toArray(new String[0]));
 		node.setLinks(links);
+//		ctx.write(new Text(node.getName()), new NodeAndPR(node));
+		double p = node.getPageRank() / list.size();
+		for (String link: list) {
+			ctx.write(new Text(link), node);
+		}
 	}
 }

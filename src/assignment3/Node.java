@@ -12,7 +12,7 @@ import java.util.ArrayList;
  */
 
 public class Node implements Writable, WritableComparable<Node> {
-    String name = "";
+    String name = " ";
     double pageRank = 0;
     ArrayList<String> links = new ArrayList<>();
 
@@ -88,7 +88,6 @@ public class Node implements Writable, WritableComparable<Node> {
         value.append(pageRank);
         value.append(":");
         value.append(printLinks());
-//        value.append(links.toString());
         return value.toString();
     }
 

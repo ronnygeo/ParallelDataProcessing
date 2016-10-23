@@ -41,7 +41,12 @@ public class NodeAndPR implements Writable {
     }
 
     public boolean isNode() {
-        return !node.getName().equals("");
+        if (node.getName().equals(" ")) {
+            return false;
+        } else {
+//            System.out.println(node);
+            return true;
+        }
     }
 
    public String toString() {

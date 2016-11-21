@@ -13,7 +13,7 @@ import java.util.Set;
 /**
  * Created by ronnygeo on 10/17/16.
  */
-//ListReducer class is used to write the adjacency list from the Input Mapper
+//InputReducer class is used to write the adjacency list from the Input Mapper
 //    to the file.
 public class ListReducer extends Reducer<Text, Text, Node, NullWritable> {
 

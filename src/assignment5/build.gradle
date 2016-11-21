@@ -4,7 +4,7 @@ plugins {
 
 apply plugin: 'java'
 apply plugin: 'application'
-mainClassName = "assignment3.MatrixMult"
+mainClassName = "assignment5.PageRank"
 
 repositories {
     mavenCentral()
@@ -28,7 +28,7 @@ jar {
     manifest {
         attributes(
             'Class-Path': configurations.compile.collect { it.getName() }.join(' '),
-            'Main-Class': 'assignment3.MatrixMult'
+            'Main-Class': 'assignment5.PageRank'
         )
     }
 }

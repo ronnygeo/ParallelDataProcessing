@@ -1,3 +1,5 @@
+package matrixmultparallel
+
 plugins {
   id 'com.github.johnrengelman.shadow' version '1.2.3'
 }

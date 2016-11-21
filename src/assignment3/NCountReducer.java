@@ -12,7 +12,7 @@ import java.util.Set;
 /**
  * Created by ronnygeo on 10/17/16.
  */
-//NCountReducer class is used to count the number of Nodes in the graph.
+//MapNodesReducer class is used to count the number of Nodes in the graph.
     //It add all the nodes to the Set which stores the nodes and stores the length of the set
 public class NCountReducer extends Reducer<Text, Text, Node, NullWritable> {
     //Set used to store the nodes
